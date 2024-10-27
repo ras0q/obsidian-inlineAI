@@ -12,19 +12,17 @@
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^22.8.0",
+		"@types/codemirror": "^5.60.15",
+		"@types/node": "^22.8.1",
 		"@typescript-eslint/eslint-plugin": "^8.11.0",
 		"@typescript-eslint/parser": "^8.11.0",
 		"builtin-modules": "^4.0.0",
 		"esbuild": "^0.24.0",
 		"obsidian": "latest",
-		"tslib": "^2.8.0",
 		"typescript": "^5.6.3"
 	},
 	"dependencies": {
-		"@tsconfig/svelte": "^5.0.4",
-		"esbuild-svelte": "^0.8.2",
-		"svelte": "^5.1.2",
-		"svelte-preprocess": "^6.0.3"
+		"@codemirror/state": "^6.4.1",
+		"@codemirror/view": "^6.34.1"
 	}
 }
