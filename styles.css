@@ -74,3 +74,19 @@ If your plugin does not need CSS, delete this file.
 
     margin-left: 8px;
 }
+
+/* src/styles.css */
+
+/* Style for Current Branch Changes */
+.cm-conflict-current {
+    background-color: rgba(255, 0, 0, 0.2); /* Light Red Background */
+    padding-left: 2px;
+  }
+  
+  /* Style for Incoming Branch Changes */
+  .cm-conflict-incoming {
+    background-color: rgba(0, 255, 0, 0.2); /* Light Green Background */
+    /* border-left: 4px solid green; */
+    padding-left: 2px;
+  }
+  

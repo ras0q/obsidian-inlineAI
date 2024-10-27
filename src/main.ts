@@ -4,6 +4,7 @@ import {
 	showTooltipEffect,
 } from "./modules/tooltipExtension";
 import { EditorView } from "@codemirror/view";
+import { conflictMarkers } from "./modules/diffExtension";
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -21,6 +22,7 @@ export default class MyPlugin extends Plugin {
 
 		// Register the cursor tooltip extension
 		this.registerEditorExtension(cursorTooltipExtension());
+		this.registerEditorExtension(conflictMarkers());
 
 		// Add command to show tooltip
 		this.addCommand({
