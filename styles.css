@@ -4,5 +4,73 @@ This CSS file will be included with your plugin, and
 available in the app when your plugin is enabled.
 
 If your plugin does not need CSS, delete this file.
-
+			// Styling for the tooltip
+			dom.style.padding = "4px 8px";
+			dom.style.background = "--background-secondary";
+			dom.style.zIndex = "--layer-tooltip";
+			dom.style.color = "#fff";
+			dom.style.borderRadius = "4px";
+			dom.style.fontSize = "--font-interface-theme";
 */
+.cm-tooltip {
+    padding: 4px 8px;
+    background: var(--background-secondary) !important;
+    z-index: var(--layer-tooltip);
+    color: var(--text-normal);
+    border-radius: 4px;
+    font-size: var(--font-interface-theme);
+    width: 80%;
+    max-width: var(--file-line-width);
+    max-height: 200px;
+    border-color: var(--background-modifier-border) !important;
+    display: flex;
+    flex-direction: row;
+    align-items: center; /* Center children vertically */
+}
+
+.cm-tooltip > :first-child {
+    margin-right: 8px; /* Add some space to the right of the first child */
+}
+
+/* .cm-tooltip > :last-child {
+    margin-left: 8px; 
+} */
+
+.cm-tooltip-editor {
+    display: flex;
+    padding: 1px;
+    padding-left: 10px;
+    height: var(--line-height);
+    width: 100%;
+    max-height: 100%; /* Ensure it can't be taller than the parent container */
+    align-items: center; /* Center children vertically */
+    background-color: var(--background-primary);
+    border: 1px solid var(--background-modifier-border-focus    );
+    border-radius: 4px;
+    overflow: hidden; /* Hide any overflow content */
+}
+
+/* HTML: <div class="loader"></div> */
+.loader {
+    width: 5px; /* Adjusted width to ensure total width is 42px with box-shadow */
+    aspect-ratio: 1;
+    border-radius: 50%;
+    color: var(--text-normal);
+    background: var(--background-primary);
+    animation: l5 1s infinite linear alternate;
+    margin-left: 26px;
+    margin-right: 20px;
+}
+
+@keyframes l5 {
+    0%  {box-shadow: 10px 0 var(--text-accent), -10px 0 var(--text-faint); background: var(--text-accent) }
+    33% {box-shadow: 10px 0 var(--text-accent), -10px 0 var(--text-faint); background: var(--text-faint)}
+    66% {box-shadow: 10px 0 var(--text-faint), -10px 0 var(--text-accent); background: var(--text-faint)}
+    100%{box-shadow: 10px 0 var(--text-faint), -10px 0 var(--text-accent); background: var(--text-accent) }
+}
+
+.submit-button {
+    height: 100%;
+
+    margin-left: 8px;
+}
