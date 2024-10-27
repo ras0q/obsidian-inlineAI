@@ -1,8 +1,21 @@
 // api.ts
-export async function callApi(content: string): Promise<string> {
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			resolve("API response for content: " + content);
-		}, 2000);
+import ollama from "ollama";
+
+export async function callApi(
+	content: string,
+	context: string
+): Promise<string> {
+	const response = await ollama.chat({
+		model: "llama3.2",
+		messages: [
+			{
+				role: "system",
+				content:
+					"Reply to the user request, do not add any intro messages or any alternative outputs, just do one example of what you are told",
+			},
+			{ role: "user", content: "```" + context + "\n" + content + "```" },
+		],
 	});
+	console.log(response.message.content);
+	return response.message.content;
 }

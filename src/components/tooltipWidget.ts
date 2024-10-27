@@ -73,7 +73,7 @@ export class TooltipWidget {
 		this.loader.style.display = "block";
 
 		try {
-			const response = await callApi(userInput);
+			const response = await callApi(userInput, this.selectedText);
 			new Notice(response);
 		} catch (error) {
 			new Notice("Error: " + (error as Error).message);

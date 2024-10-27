@@ -23,6 +23,7 @@
 	},
 	"dependencies": {
 		"@codemirror/state": "^6.4.1",
-		"@codemirror/view": "^6.34.1"
+		"@codemirror/view": "^6.34.1",
+		"ollama": "^0.5.9"
 	}
 }
