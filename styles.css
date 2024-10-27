@@ -90,3 +90,9 @@ If your plugin does not need CSS, delete this file.
     padding-left: 2px;
   }
   
+.cm-selected-inline {
+    background-color: var(--text-highlight-bg);
+}
+
+
+
