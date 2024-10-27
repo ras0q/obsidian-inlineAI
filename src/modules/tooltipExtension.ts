@@ -1,19 +1,18 @@
-// extensions.ts
-import { StateField, EditorState } from "@codemirror/state";
+import { StateField, EditorState, StateEffect } from "@codemirror/state";
 import { showTooltip, type Tooltip } from "@codemirror/view";
 import { TooltipWidget } from "../components/tooltipWidget";
-import { StateEffect } from "@codemirror/state";
+import { App } from "obsidian";
 
 export const showTooltipEffect = StateEffect.define<null>();
 
-export function cursorTooltipExtension() {
+export function cursorTooltipExtension(app: App) {
 	return StateField.define<Tooltip | null>({
 		create() {
 			return null;
 		},
 		update(tooltip, tr) {
 			if (tr.effects.some((e) => e.is(showTooltipEffect))) {
-				return getCursorTooltip(tr.state);
+				return getCursorTooltip(tr.state, app);
 			}
 			if (tr.docChanged || tr.selection) {
 				return null;
@@ -24,7 +23,7 @@ export function cursorTooltipExtension() {
 	});
 }
 
-function getCursorTooltip(state: EditorState): Tooltip | null {
+function getCursorTooltip(state: EditorState, app: App): Tooltip | null {
 	const { selection } = state;
 	const mainSelection = selection.main;
 	const { from, to, head, anchor } = mainSelection;
@@ -43,31 +42,27 @@ function getCursorTooltip(state: EditorState): Tooltip | null {
 			const endLine = state.doc.lineAt(to);
 
 			if (endLine.number < state.doc.lines) {
-				// Get the next line's start position
 				const nextLine = state.doc.line(endLine.number + 1);
 				posAt = nextLine.from;
 			} else {
-				// If at the end of the document, place tooltip at the document's end
 				posAt = state.doc.length;
 			}
-			above = false; // Tooltip is below
+			above = false;
 		} else if (head < anchor) {
 			console.log("Putting tooltip above");
 			const startLine = state.doc.lineAt(from);
 			posAt = startLine.from;
-			above = true; // Tooltip is above
+			above = true;
 		} else {
-			// Fallback for any other cases
 			posAt = currentLine.from;
 			above = true;
 		}
 	} else {
-		// When there's no active selection, place tooltip at the start of the current line
 		posAt = currentLine.from;
 		above = true;
 	}
 
-	const tooltipWidget = new TooltipWidget(selectedText); // Pass selectedText
+	const tooltipWidget = new TooltipWidget(app, selectedText);
 
 	return {
 		pos: posAt,

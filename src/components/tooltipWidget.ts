@@ -1,7 +1,6 @@
-// TooltipWidget.ts
 import { EditorView, placeholder, keymap } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
-import { ButtonComponent, setIcon, Notice } from "obsidian";
+import { ButtonComponent, setIcon, Notice, App, MarkdownView } from "obsidian";
 import { callApi } from "../api";
 
 export class TooltipWidget {
@@ -9,10 +8,11 @@ export class TooltipWidget {
 	editorView: EditorView;
 	submitButton: ButtonComponent;
 	loader: HTMLDivElement;
-	selectedText: string; // Add property to store selected text
+	selectedText: string;
+	app: App;
 
-	constructor(selectedText: string) {
-		// Accept selectedText as a parameter
+	constructor(app: App, selectedText: string) {
+		this.app = app;
 		this.selectedText = selectedText;
 
 		this.dom = document.createElement("div");
@@ -65,7 +65,6 @@ export class TooltipWidget {
 	async submitAction() {
 		const userInput = this.editorView.state.doc.toString();
 
-		// Log the selected text from the main editor
 		console.log("Selected Text:", this.selectedText);
 
 		this.submitButton.setDisabled(true);
@@ -74,7 +73,16 @@ export class TooltipWidget {
 
 		try {
 			const response = await callApi(userInput, this.selectedText);
-			new Notice(response);
+			new Notice("Response received and replacing selected text.");
+
+			const markdownView =
+				this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (markdownView) {
+				const editor = markdownView.editor;
+				editor.replaceSelection(response);
+			} else {
+				new Notice("Failed to find the active Markdown editor.");
+			}
 		} catch (error) {
 			new Notice("Error: " + (error as Error).message);
 		} finally {

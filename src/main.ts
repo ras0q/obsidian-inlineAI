@@ -21,7 +21,7 @@ export default class MyPlugin extends Plugin {
 		await this.loadSettings();
 
 		// Register the cursor tooltip extension
-		this.registerEditorExtension(cursorTooltipExtension());
+		this.registerEditorExtension(cursorTooltipExtension(this.app));
 		this.registerEditorExtension(conflictMarkers());
 
 		// Add command to show tooltip

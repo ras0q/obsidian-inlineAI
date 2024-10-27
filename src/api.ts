@@ -1,6 +1,9 @@
 // api.ts
 import ollama from "ollama";
-
+import {
+	generateFineGrainedConflictWithinLine,
+	generateFineGrainedConflictWithinLineString,
+} from "./helpers/conflictMarkers";
 export async function callApi(
 	content: string,
 	context: string
@@ -16,6 +19,11 @@ export async function callApi(
 			{ role: "user", content: "```" + context + "\n" + content + "```" },
 		],
 	});
-	console.log(response.message.content);
-	return response.message.content;
+	console.log(
+		generateFineGrainedConflictWithinLine(context, response.message.content)
+	);
+	return generateFineGrainedConflictWithinLineString(
+		context,
+		response.message.content
+	);
 }
