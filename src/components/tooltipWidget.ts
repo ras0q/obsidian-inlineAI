@@ -9,11 +9,15 @@ export class TooltipWidget {
 	submitButton: ButtonComponent;
 	loader: HTMLDivElement;
 	selectedText: string;
+	promptText: string;
+	generatedText: string;
 	app: App;
 
 	constructor(app: App, selectedText: string) {
 		this.app = app;
 		this.selectedText = selectedText;
+		this.generatedText = "";
+		this.promptText = "";
 
 		this.dom = document.createElement("div");
 		this.dom.className = "cm-tooltip";
@@ -64,7 +68,7 @@ export class TooltipWidget {
 
 	async submitAction() {
 		const userInput = this.editorView.state.doc.toString();
-
+		this.promptText = userInput;
 		console.log("Selected Text:", this.selectedText);
 
 		this.submitButton.setDisabled(true);
@@ -74,7 +78,7 @@ export class TooltipWidget {
 		try {
 			const response = await callApi(userInput, this.selectedText);
 			new Notice("Response received and replacing selected text.");
-
+			this.generatedText = response;
 			const markdownView =
 				this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (markdownView) {
@@ -94,6 +98,7 @@ export class TooltipWidget {
 
 	destroy() {
 		this.editorView.destroy();
+		this.dom.remove();
 	}
 
 	mount() {

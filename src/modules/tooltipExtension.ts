@@ -1,7 +1,8 @@
 import { StateField, EditorState, StateEffect } from "@codemirror/state";
-import { showTooltip, type Tooltip } from "@codemirror/view";
+import { EditorView, showTooltip, type Tooltip } from "@codemirror/view";
 import { TooltipWidget } from "../components/tooltipWidget";
-import { App } from "obsidian";
+import { App, MarkdownView } from "obsidian";
+import { showDiffEditorEffect } from "./diffEditorExtension";
 
 export const showTooltipEffect = StateEffect.define<null>();
 
@@ -11,6 +12,7 @@ export function cursorTooltipExtension(app: App) {
 			return null;
 		},
 		update(tooltip, tr) {
+			// Check if the transaction contains an effect to show the tooltip
 			if (tr.effects.some((e) => e.is(showTooltipEffect))) {
 				return getCursorTooltip(tr.state, app);
 			}
@@ -67,9 +69,28 @@ function getCursorTooltip(state: EditorState, app: App): Tooltip | null {
 	return {
 		pos: posAt,
 		above,
+		arrow: true,
 		create: () => ({
 			dom: tooltipWidget.dom,
-			destroy: () => tooltipWidget.destroy(),
+			destroy: () => {
+				const markdownView =
+					app.workspace.getActiveViewOfType(MarkdownView);
+				if (markdownView) {
+					setTimeout(() => {
+						(
+							(markdownView.editor as any).cm as EditorView
+						).dispatch({
+							effects: showDiffEditorEffect.of({
+								posAt: posAt,
+								selectedText: selectedText,
+								generatedText: tooltipWidget.generatedText,
+								promptText: tooltipWidget.promptText,
+							}),
+						});
+					}, 0);
+				}
+				tooltipWidget.destroy();
+			},
 			mount: () => tooltipWidget.mount(),
 		}),
 	};

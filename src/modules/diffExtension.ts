@@ -136,16 +136,6 @@ const conflictMarkersPlugin = ViewPlugin.fromClass(
 			let lastAddedTo = -1;
 			for (const deco of decorationsToAdd) {
 				if (deco.from < lastAddedTo) {
-					console.warn(
-						`Overlapping conflict markers detected between positions ${
-							deco.from
-						} and ${lastAddedTo}. Skipping overlapping decoration. Nearby text: "${text.slice(
-							deco.from - 10,
-							deco.to + 10
-						)} Tried to add decoration: ${
-							deco.decoration.spec.classList
-						}`
-					);
 					continue; // Skip overlapping decorations to prevent errors
 				}
 				builder.add(deco.from, deco.to, deco.decoration);

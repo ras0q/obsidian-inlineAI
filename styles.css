@@ -22,19 +22,14 @@ If your plugin does not need CSS, delete this file.
     width: 80%;
     max-width: var(--file-line-width);
     max-height: 200px;
-    border-color: var(--background-modifier-border) !important;
+    border : 1px solid var(--background-modifier-border) !important;
     display: flex;
     flex-direction: row;
     align-items: center; /* Center children vertically */
 }
 
-.cm-tooltip > :first-child {
-    margin-right: 8px; /* Add some space to the right of the first child */
-}
 
-/* .cm-tooltip > :last-child {
-    margin-left: 8px; 
-} */
+
 
 .cm-tooltip-editor {
     display: flex;
@@ -48,6 +43,7 @@ If your plugin does not need CSS, delete this file.
     border: 1px solid var(--background-modifier-border-focus    );
     border-radius: 4px;
     overflow: hidden; /* Hide any overflow content */
+    margin-left: 8px;
 }
 
 /* HTML: <div class="loader"></div> */
@@ -75,6 +71,23 @@ If your plugin does not need CSS, delete this file.
     margin-left: 8px;
 }
 
+.reload-button {
+    margin-left: auto !important;
+}
+
+.accept-button {
+    background-color: var(--interactive-accent) !important;
+}
+
+.tooltip-button {
+
+    height: calc(var(--line-height)-12px) !important;
+    /* padding-top: 5px;
+    padding-bottom: 5px; */
+    margin-bottom: 0px;
+    margin-left: 8px;
+}
+
 /* src/styles.css */
 
 /* Style for Current Branch Changes */
@@ -94,5 +107,11 @@ If your plugin does not need CSS, delete this file.
     background-color: var(--text-highlight-bg);
 }
 
-
-
+.cm-tooltip-arrow {
+    /* background-color: var(--background-secondary); */
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 7px solid var(--background-modifier-border) !important;
+}
