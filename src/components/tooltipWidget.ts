@@ -270,6 +270,8 @@ export class TooltipWidget {
 		}
 
 		try {
+			const userInput = this.editorView.state.doc.toString();
+			this.promptText = userInput;
 			// Step 5: Call the API to get the new generated text
 			const response = await callApi(this.promptText, this.selectedText);
 			this.generatedText = response.generated;
