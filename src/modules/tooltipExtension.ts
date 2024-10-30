@@ -1,10 +1,15 @@
-import { StateField, EditorState, StateEffect } from "@codemirror/state";
+import {
+	StateField,
+	EditorState,
+	StateEffect,
+	Transaction,
+} from "@codemirror/state";
 import { EditorView, showTooltip, type Tooltip } from "@codemirror/view";
 import { TooltipWidget } from "../components/tooltipWidget";
 import { App, MarkdownView } from "obsidian";
-import { showDiffEditorEffect } from "./diffEditorExtension";
 
 export const showTooltipEffect = StateEffect.define<null>();
+export const dismissTooltipEffect = StateEffect.define<null>();
 
 export function cursorTooltipExtension(app: App) {
 	return StateField.define<Tooltip | null>({
@@ -16,13 +21,30 @@ export function cursorTooltipExtension(app: App) {
 			if (tr.effects.some((e) => e.is(showTooltipEffect))) {
 				return getCursorTooltip(tr.state, app);
 			}
-			if (tr.docChanged || tr.selection) {
+			// Check if the transaction contains an effect to dismiss the tooltip
+			if (tr.effects.some((e) => e.is(dismissTooltipEffect))) {
 				return null;
 			}
-			return tooltip;
+			// Keep the tooltip if it's already visible
+			if (tooltip && !shouldDismissTooltip(tr)) {
+				return tooltip;
+			}
+			return null;
 		},
 		provide: (field) => showTooltip.from(field),
 	});
+}
+
+function shouldDismissTooltip(tr: Transaction): boolean {
+	// Dismiss the tooltip if the user presses Escape
+	if (tr.selection) {
+		const { main } = tr.selection;
+		if (main.empty && tr.docChanged) {
+			return false; // Keep the tooltip open on document changes
+		}
+	}
+	// Add any additional conditions for dismissing the tooltip here
+	return false;
 }
 
 function getCursorTooltip(state: EditorState, app: App): Tooltip | null {
@@ -70,28 +92,47 @@ function getCursorTooltip(state: EditorState, app: App): Tooltip | null {
 		pos: posAt,
 		above,
 		arrow: true,
-		create: () => ({
-			dom: tooltipWidget.dom,
-			destroy: () => {
-				const markdownView =
-					app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					setTimeout(() => {
-						(
-							(markdownView.editor as any).cm as EditorView
-						).dispatch({
-							effects: showDiffEditorEffect.of({
-								posAt: posAt,
-								selectedText: selectedText,
-								generatedText: tooltipWidget.generatedText,
-								promptText: tooltipWidget.promptText,
-							}),
-						});
-					}, 0);
+		create: (view: EditorView) => {
+			const dom = tooltipWidget.dom;
+
+			// Add the event listener
+			const onClick = (event: MouseEvent) => {
+				if (!dom.contains(event.target as Node)) {
+					// Clicked outside the tooltip
+					view.dispatch({
+						effects: dismissTooltipEffect.of(null),
+					});
 				}
-				tooltipWidget.destroy();
-			},
-			mount: () => tooltipWidget.mount(),
-		}),
+			};
+
+			document.addEventListener("mousedown", (event: MouseEvent) => {
+				if (!dom.contains(event.target as Node)) {
+					// Clicked outside the tooltip
+					view.dispatch({
+						effects: dismissTooltipEffect.of(null),
+					});
+				}
+			});
+			const onEscape = (event: KeyboardEvent) => {
+				if (event.key === "Escape") {
+					view.dispatch({
+						effects: dismissTooltipEffect.of(null),
+					});
+				}
+			};
+			// listen also for escape key
+			document.addEventListener("keydown", onEscape);
+
+			return {
+				dom: tooltipWidget.dom,
+				destroy: () => {
+					// Remove the event listener when the tooltip is destroyed
+					document.removeEventListener("mousedown", onClick);
+					document.removeEventListener("keydown", onEscape);
+					tooltipWidget.destroy();
+				},
+				mount: () => tooltipWidget.mount(),
+			};
+		},
 	};
 }

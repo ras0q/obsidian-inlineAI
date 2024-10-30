@@ -5,10 +5,6 @@ import {
 } from "./modules/tooltipExtension";
 import { EditorView } from "@codemirror/view";
 import { conflictMarkers } from "./modules/diffExtension";
-import {
-	showDiffEditorEffect,
-	showDiffEditorExtension,
-} from "./modules/diffEditorExtension";
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -27,7 +23,6 @@ export default class MyPlugin extends Plugin {
 		// Register the cursor tooltip extension
 		this.registerEditorExtension(cursorTooltipExtension(this.app));
 		this.registerEditorExtension(conflictMarkers());
-		this.registerEditorExtension(showDiffEditorExtension(this.app));
 
 		// Add command to show tooltip
 		this.addCommand({
@@ -42,7 +37,6 @@ export default class MyPlugin extends Plugin {
 					((markdownView.editor as any).cm as EditorView).dispatch({
 						effects: showTooltipEffect.of(null),
 					});
-					
 				}
 			},
 			hotkeys: [

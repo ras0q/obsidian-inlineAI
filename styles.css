@@ -1,17 +1,4 @@
-/*
-
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-			// Styling for the tooltip
-			dom.style.padding = "4px 8px";
-			dom.style.background = "--background-secondary";
-			dom.style.zIndex = "--layer-tooltip";
-			dom.style.color = "#fff";
-			dom.style.borderRadius = "4px";
-			dom.style.fontSize = "--font-interface-theme";
-*/
+/* Tooltip Styles */
 .cm-tooltip {
     padding: 4px 8px;
     background: var(--background-secondary) !important;
@@ -19,96 +6,95 @@ If your plugin does not need CSS, delete this file.
     color: var(--text-normal);
     border-radius: 4px;
     font-size: var(--font-interface-theme);
-    width: 80%;
+    width: 90%;
     max-width: var(--file-line-width);
     max-height: 200px;
-    border : 1px solid var(--background-modifier-border) !important;
+    border: 1px solid var(--background-modifier-border) !important;
     display: flex;
     flex-direction: row;
-    align-items: center; /* Center children vertically */
+    align-items: center;
+    @media (min-width: 1024px) {
+        margin-left: 10px;
+    }
+    
 }
-
-
-
 
 .cm-tooltip-editor {
     display: flex;
-    padding: 1px;
-    padding-left: 10px;
+    padding: 1px 0 1px 10px;
     height: var(--line-height);
-    width: 100%;
-    max-height: 100%; /* Ensure it can't be taller than the parent container */
-    align-items: center; /* Center children vertically */
+    width: auto;
+    max-height: 100%;
+    align-items: center;
     background-color: var(--background-primary);
-    border: 1px solid var(--background-modifier-border-focus    );
+    border: 1px solid var(--background-modifier-border-focus);
     border-radius: 4px;
-    overflow: hidden; /* Hide any overflow content */
+    overflow: hidden;
     margin-left: 8px;
+    flex: 1 0 0;
+    transition: flex-basis 0.3s ease;
 }
 
-/* HTML: <div class="loader"></div> */
+/* Loader Animation */
 .loader {
-    width: 5px; /* Adjusted width to ensure total width is 42px with box-shadow */
+    width: 5px;
     aspect-ratio: 1;
     border-radius: 50%;
     color: var(--text-normal);
     background: var(--background-primary);
     animation: l5 1s infinite linear alternate;
-    margin-left: 26px;
-    margin-right: 20px;
+    margin: 0 20px 0 26px;
 }
 
 @keyframes l5 {
-    0%  {box-shadow: 10px 0 var(--text-accent), -10px 0 var(--text-faint); background: var(--text-accent) }
-    33% {box-shadow: 10px 0 var(--text-accent), -10px 0 var(--text-faint); background: var(--text-faint)}
-    66% {box-shadow: 10px 0 var(--text-faint), -10px 0 var(--text-accent); background: var(--text-faint)}
-    100%{box-shadow: 10px 0 var(--text-faint), -10px 0 var(--text-accent); background: var(--text-accent) }
+    0%, 33% {
+        box-shadow: 10px 0 var(--text-accent), -10px 0 var(--text-faint);
+        background: var(--text-accent);
+    }
+    66%, 100% {
+        box-shadow: 10px 0 var(--text-faint), -10px 0 var(--text-accent);
+        background: var(--text-faint);
+    }
 }
 
+/* Button Styles */
 .submit-button {
-    height: 100%;
-
-    margin-left: 8px;
+    height: var(--line-height);
 }
 
 .reload-button {
-    margin-left: auto !important;
+	padding-top: 3px;
+	padding-bottom: 1px;
 }
 
 .accept-button {
     background-color: var(--interactive-accent) !important;
+    color: var(--text-on-accent) !important;
 }
 
 .tooltip-button {
-
-    height: calc(var(--line-height)-12px) !important;
-    /* padding-top: 5px;
-    padding-bottom: 5px; */
-    margin-bottom: 0px;
+    height: 100%;
     margin-left: 8px;
+    border: 1px solid var(--background-modifier-border-focus);
 }
 
-/* src/styles.css */
-
-/* Style for Current Branch Changes */
+/* Conflict Styles */
 .cm-conflict-current {
-    background-color: rgba(255, 0, 0, 0.2); /* Light Red Background */
+    background-color: rgba(255, 0, 0, 0.2);
     padding-left: 2px;
-  }
-  
-  /* Style for Incoming Branch Changes */
-  .cm-conflict-incoming {
-    background-color: rgba(0, 255, 0, 0.2); /* Light Green Background */
-    /* border-left: 4px solid green; */
+}
+
+.cm-conflict-incoming {
+    background-color: rgba(0, 255, 0, 0.2);
     padding-left: 2px;
-  }
-  
+}
+
 .cm-selected-inline {
     background-color: var(--text-highlight-bg);
 }
 
+/* Tooltip Arrow */
 .cm-tooltip-arrow {
-    /* background-color: var(--background-secondary); */
     width: 0;
     height: 0;
     border-left: 7px solid transparent;

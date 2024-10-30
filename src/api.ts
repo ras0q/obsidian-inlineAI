@@ -7,7 +7,7 @@ import {
 export async function callApi(
 	content: string,
 	context: string
-): Promise<string> {
+): Promise<{ generated: string; diff: string }> {
 	const response = await ollama.chat({
 		model: "llama3.2",
 		messages: [
@@ -19,11 +19,15 @@ export async function callApi(
 			{ role: "user", content: "```" + context + "\n" + content + "```" },
 		],
 	});
+	const generatedContent = response.message.content;
 	console.log(
-		generateFineGrainedConflictWithinLine(context, response.message.content)
+		generateFineGrainedConflictWithinLine(context, generatedContent)
 	);
-	return generateFineGrainedConflictWithinLineString(
-		context,
-		response.message.content
-	);
+	return {
+		generated: generatedContent,
+		diff: generateFineGrainedConflictWithinLineString(
+			context,
+			generatedContent
+		),
+	};
 }
