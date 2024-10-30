@@ -105,6 +105,10 @@ function getCursorTooltip(state: EditorState, app: App): Tooltip | null {
 				}
 			};
 
+			dom.addEventListener("mousedown", (event: MouseEvent) => {
+				event.stopPropagation(); // Prevent the event from propagating to the document
+			});
+
 			document.addEventListener("mousedown", (event: MouseEvent) => {
 				if (!dom.contains(event.target as Node)) {
 					// Clicked outside the tooltip
