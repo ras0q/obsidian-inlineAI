@@ -21,6 +21,7 @@ import { ChatApiManager } from "../api";
 
 import { currentSelectionState, SelectionInfo } from "./SelectionState";
 import { slashCommandAutocompletion } from "./commands/source";
+import { slashCommands } from "./commands/commands";
 
 
 
@@ -150,7 +151,10 @@ class FloatingWidget extends WidgetType {
                   },
                 ]),
                 // 3) Enable slash-command autocompletion
-                slashCommandAutocompletion
+                slashCommandAutocompletion({
+                  prefix: ':',
+                  customCommands: slashCommands
+                })
               ],
             }),
             parent: editorDom,
