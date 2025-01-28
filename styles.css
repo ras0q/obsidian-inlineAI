@@ -21,7 +21,7 @@
 	flex-direction: row;
 	align-items: center;
 
-	overflow: hidden;
+	overflow: visible;
 }
 
 .cm-tooltip-editor {
@@ -34,7 +34,7 @@
 	background-color: var(--background-primary);
 	border: 1px solid var(--background-modifier-border-focus);
 	border-radius: 4px;
-	overflow: hidden;
+	overflow: visible;
 	margin-left: 8px;
 	flex: 1 0 0;
 	transition: flex-basis 0.3s ease;

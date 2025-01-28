@@ -13,10 +13,16 @@ import {
     placeholder,
     keymap,
 } from "@codemirror/view";
+import { defaultKeymap } from "@codemirror/commands";
+import { autocompletion } from "@codemirror/autocomplete"
+
 import { setIcon } from "obsidian";
 import { ChatApiManager } from "../api";
 
 import { currentSelectionState, SelectionInfo } from "./SelectionState";
+import { slashCommandAutocompletion } from "./commands/source";
+
+
 
 // Some existing exports
 export const commandEffect = StateEffect.define<null>();
@@ -127,23 +133,29 @@ class FloatingWidget extends WidgetType {
 
         this.textFieldView = new EditorView({
             state: EditorState.create({
-                doc: "",
-                extensions: [
-                    placeholder("Ask copilot"),
-                    keymap.of([
-                        {
-                            key: "Enter",
-                            run: () => {
-                                this.submitAction();
-                                return true;
-                            },
-                            preventDefault: true,
-                        },
-                    ]),
-                ],
+              doc: "",
+              extensions: [
+                // 1) Show a placeholder in the input field
+                placeholder("Ask copilot"),
+                // 2) Add key bindings (including default ones for typical editor commands)
+                keymap.of([
+                  ...defaultKeymap,
+                  {
+                    key: "Enter",
+                    run: () => {
+                      this.submitAction()
+                      return true
+                    },
+                    preventDefault: true,
+                  },
+                ]),
+                // 3) Enable slash-command autocompletion
+                slashCommandAutocompletion
+              ],
             }),
             parent: editorDom,
-        });
+          })
+          
     }
 
     private createSubmitButton() {
@@ -300,6 +312,13 @@ function renderFloatingWidget(
 /**
  * Defines the selection overlay field with access to ChatApiManager.
  */
+    /**
+     * A StateField that manages the decoration set for the floating widget.
+     *
+     * When the user triggers the command, it re-renders the widget.
+     * When the user dismisses the tooltip, it clears the decoration set.
+     * Otherwise, it returns the existing decoration set.
+     */
 function FloatingTooltipState(chatApiManager: ChatApiManager) {
     return StateField.define<DecorationSet>({
         create(state) {
