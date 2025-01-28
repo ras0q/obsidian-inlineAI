@@ -10,6 +10,7 @@ export interface InlineAISettings {
 	customURL?: string; // Add a custom URL field
 	selectionPrompt: string;
 	cursorPrompt: string;
+	customCommands: { name: string; prompt: string }[]; // Add custom commands array
 }
 
 // Default settings values
@@ -20,6 +21,7 @@ export const DEFAULT_SETTINGS: InlineAISettings = {
 	customURL: "",
 	selectionPrompt: selectionPrompt,
 	cursorPrompt: cursorPrompt,
+	customCommands: [], // Default is an empty array
 };
 
 // Settings tab class to display settings in Obsidian UI
@@ -146,5 +148,58 @@ export class InlineAISettingsTab extends PluginSettingTab {
 				// Add a CSS class for styling
 				textarea.inputEl.classList.add("wide-text-settings");
 			});
+
+		// Custom Commands Section
+		containerEl.createEl("h3", { text: "Custom Commands" });
+		// Add a description
+		containerEl.createEl("p", { text: "Add your own custom commands. Triggered with /" });
+
+		// Display existing commands
+		this.plugin.settings.customCommands.forEach((command, index) => {
+			const setting = new Setting(containerEl)
+				.setName(`Command: ${command.name}`)
+				.setDesc("Edit the command prompt.")
+				.addText((text) =>
+					text
+						.setValue(command.name)
+						.setPlaceholder("Command name")
+						.onChange(async (value) => {
+							this.plugin.settings.customCommands[index].name = value;
+							await this.plugin.saveSettings();
+						})
+				)
+				.addTextArea((textarea) =>
+					textarea
+						.setValue(command.prompt)
+						.setPlaceholder("Command prompt")
+						.onChange(async (value) => {
+							this.plugin.settings.customCommands[index].prompt = value;
+							await this.plugin.saveSettings();
+						})
+				)
+				.addExtraButton((btn) =>
+					btn
+						.setIcon("trash")
+						.setTooltip("Delete this command")
+						.onClick(async () => {
+							this.plugin.settings.customCommands.splice(index, 1);
+							await this.plugin.saveSettings();
+							this.display(); // Refresh the display
+						})
+				);
+		});
+
+		// Add new command button
+		new Setting(containerEl)
+			.addButton((btn) =>
+				btn
+					.setButtonText("Add Command")
+					.setCta()
+					.onClick(async () => {
+						this.plugin.settings.customCommands.push({ name: "New Command", prompt: "" });
+						await this.plugin.saveSettings();
+						this.display(); // Refresh the display
+					})
+			);
 	}
 }

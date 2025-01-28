@@ -1,13 +1,14 @@
 import { autocompletion, CompletionContext } from "@codemirror/autocomplete"
+import { SlashCommand, slashCommands } from "./commands";
 
 
 // Factory function that creates a completion source with custom parameters
 function createSlashCommandSource(options: {
   prefix?: string,
-  customCommands: Array<{ label: string, type: string }>
+  customCommands: SlashCommand[]
 } = { 
   prefix: '/', 
-  customCommands: []
+  customCommands: slashCommands
 }) {
   const { prefix, customCommands } = options;
   console.log(prefix, customCommands)
@@ -26,6 +27,8 @@ function createSlashCommandSource(options: {
 }
 
 // Create the extension that uses our custom completion source.
-export const slashCommandAutocompletion = (options = { customCommands: [] }) => autocompletion({
-  override: [createSlashCommandSource(options)]
-})
+export function slashCommandAutocompletion(options: { prefix?: string, customCommands: SlashCommand[] } = { customCommands: [] }) {
+  return autocompletion({
+    override: [createSlashCommandSource(options)]
+  })
+}

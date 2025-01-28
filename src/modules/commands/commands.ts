@@ -1,4 +1,13 @@
-export const slashCommands = [
+import { EditorView } from "@codemirror/view"
+
+export interface SlashCommand {
+  label: string;
+  detail: string;
+  info: string;
+  apply: (view: EditorView) => void;
+}
+
+export const slashCommands: SlashCommand[] = [
     {
       label: "Bold",
       detail: "Apply bold formatting",
