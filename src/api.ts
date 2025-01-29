@@ -12,13 +12,14 @@ import { parseCommand } from "./modules/commands/parser";
  * Class to manage interactions with different chat APIs.
  */
 export class ChatApiManager {
-  private chatClient: ChatOpenAI | ChatOllama;
+  private chatClient: ChatOpenAI | ChatOllama | null;
   private app: App;
   private settings: InlineAISettings;
 
   /**
    * Initializes the ChatApiManager with the given settings.
    * @param settings - Configuration settings for the chat API.
+   * @param app - The Obsidian App instance.
    */
   constructor(settings: InlineAISettings, app: App) {
     this.app = app;
@@ -29,36 +30,32 @@ export class ChatApiManager {
   /**
    * Initializes the appropriate chat client based on the provider specified in settings.
    * @param settings - Configuration settings for the chat API.
-   * @returns An instance of ChatOpenAI or ChatOllama.
-   * @throws Error if the provider is unsupported or required settings are missing.
+   * @returns An instance of ChatOpenAI, ChatOllama, or null if initialization fails.
    */
-  private initializeChatClient(settings: InlineAISettings): ChatOpenAI | ChatOllama {
+  private initializeChatClient(settings: InlineAISettings): ChatOpenAI | ChatOllama | null {
     try {
       switch (settings.provider) {
         case "openai":
           if (!settings.apiKey) {
-            throw new Error("OpenAI API key is required when using OpenAI as the provider.");
+            new Notice("⚠️ OpenAI API key is required. Please check your settings.");
+            return null;
           }
           return new ChatOpenAI({
             modelName: settings.model,
-            temperature: 0, // Set temperature to 0 for deterministic outputs
+            temperature: 0,
             apiKey: settings.apiKey,
           });
 
         case "ollama":
           return new ChatOllama({
             model: settings.model,
-            // Add other necessary configurations for Ollama if needed
           });
 
         case "custom":
-          if (!settings.apiKey) {
-            throw new Error("An API key is required for custom providers.");
+          if (!settings.apiKey || !settings.customURL) {
+            new Notice("⚠️ API key and custom base URL are required for custom providers.");
+            return null;
           }
-          if (!settings.customURL) {
-            throw new Error("A custom base URL is required for custom providers.");
-          }
-          // Use ChatOpenAI with configuration pointing to user’s custom URL
           return new ChatOpenAI({
             modelName: settings.model,
             temperature: 0,
@@ -70,12 +67,13 @@ export class ChatApiManager {
           });
 
         default:
-          throw new Error(`Unsupported provider: ${settings.provider}`);
+          new Notice(`⚠️ Unsupported provider: ${settings.provider}`);
+          return null;
       }
     } catch (error) {
       console.error("Error initializing chat client:", error);
-      new Notice(`Error initializing chat client: ${error}`);
-      throw new Error("Failed to initialize chat client.");
+      new Notice(`❌ Error initializing chat client: ${error.message}`);
+      return null;
     }
   }
 
@@ -83,10 +81,14 @@ export class ChatApiManager {
    * Calls the chat API with the provided content and context.
    * @param systemMessage - The system message to send to the chat API.
    * @param message - The user's message to send to the chat API.
-   * @returns A promise that resolves with the generated content.
-   * @throws Error if the API call fails.
+   * @returns A promise that resolves with the generated content or an error message.
    */
   public async callApi(systemMessage: string, message: string): Promise<string> {
+    if (!this.chatClient) {
+      new Notice("⚠️ Chat client is not initialized. Please check your settings.");
+      return "⚠️ Chat client is not available.";
+    }
+
     const messages = [
       new SystemMessage(systemMessage),
       new HumanMessage(message),
@@ -97,8 +99,8 @@ export class ChatApiManager {
       return aiMessage.content.toString();
     } catch (error) {
       console.error("Error calling the chat model:", error);
-      new Notice(`Error calling the chat model: ${error}`);
-      throw new Error("Failed to generate response from the chat model.");
+      new Notice(`❌ Error calling the chat model: ${error.message}`);
+      return "⚠️ Failed to generate a response. Please try again later.";
     }
   }
 
@@ -106,15 +108,18 @@ export class ChatApiManager {
    * Handles user input and updates the editor with the response.
    * @param systemPrompt - The system prompt to send to the chat API.
    * @param userRequest - The user's request to process.
-   * @returns The AI-generated response.
+   * @returns The AI-generated response or an error message.
    */
   private async handleEditorUpdate(systemPrompt: string, userRequest: string): Promise<string> {
     try {
       const response = await this.callApi(systemPrompt, userRequest);
+      if (!response) return "⚠️ No response generated.";
 
       const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-
-      if (!markdownView) return "";
+      if (!markdownView) {
+        new Notice("⚠️ No active Markdown editor found.");
+        return "";
+      }
 
       const mainEditorView = (markdownView.editor as any).cm as EditorView;
       mainEditorView?.dispatch({
@@ -124,15 +129,15 @@ export class ChatApiManager {
       return response;
     } catch (error) {
       console.error("Error processing request:", error);
-      new Notice(`Error processing request: ${error}`);
-      throw new Error("Failed to process request.");
+      new Notice(`❌ Error processing request: ${error.message}`);
+      return "⚠️ Failed to process request.";
     }
   }
 
   /**
    * Handles user input and generates a response using the cursor API.
    * @param userRequest - The user's request to process.
-   * @returns The AI-generated response.
+   * @returns The AI-generated response or an error message.
    */
   public async callCursor(userRequest: string): Promise<string> {
     const systemPrompt = "You are a helpful assistant. Please help the user with the following request:";
@@ -143,15 +148,19 @@ export class ChatApiManager {
    * Processes selected text using the specified prompt and transformation.
    * @param prompt - The transformation prompt (e.g., "Add Emojis").
    * @param selectedText - The selected text to transform.
-   * @returns The transformed text.
+   * @returns The transformed text or an error message.
    */
   public async callSelection(prompt: string, selectedText: string): Promise<string> {
-    let isCursor = false;
-    if (selectedText.trim().length === 0) { isCursor = true; }
+    prompt = parseCommand(prompt, this.settings.commandPrefix, this.settings.customCommands);
 
+    let isCursor = false;
+    if (selectedText.trim().length === 0) {
+      isCursor = true;
+    }
 
     const systemPrompt = isCursor ? this.settings.cursorPrompt : this.settings.selectionPrompt;
     let userPrompt = ``;
+    
     if (isCursor) {
       userPrompt = `
       **Task:** ${prompt}  
@@ -164,8 +173,7 @@ export class ChatApiManager {
 
       **Output:**`;
     }
-
-    return this.handleEditorUpdate(systemPrompt, parseCommand(userPrompt, this.settings.commandPrefix, this.settings.customCommands)); 
+    return this.handleEditorUpdate(systemPrompt, userPrompt); 
   }
 
   /**
@@ -174,6 +182,10 @@ export class ChatApiManager {
    */
   public updateSettings(settings: InlineAISettings): void {
     this.settings = settings;
-    this.chatClient = this.initializeChatClient(settings);
+    const newChatClient = this.initializeChatClient(settings);
+    if (!newChatClient) {
+      new Notice("⚠️ Failed to initialize new chat client. Check your settings.");
+    }
+    this.chatClient = newChatClient;
   }
 }
