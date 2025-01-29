@@ -17,12 +17,11 @@ export default class InlineAIChatPlugin extends Plugin {
 		this.chatapi = new ChatApiManager(this.settings, this.app);
 
 		this.registerEditorExtension([
-			FloatingTooltipExtension(this.chatapi),
+			FloatingTooltipExtension(this.chatapi, this),
 			generatedResponseState,
 			currentSelectionState,
 			buildSelectionHiglightState,
 			diffExtension
-
 		]);
 
 		// Add command to show tooltip

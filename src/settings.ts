@@ -1,6 +1,7 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import MyPlugin from "./main";
 import { cursorPrompt, selectionPrompt } from "./default_prompts";
+import { SlashCommand } from "./modules/commands/source";
 
 // Interface for the settings
 export interface InlineAISettings {
@@ -10,7 +11,8 @@ export interface InlineAISettings {
 	customURL?: string; // Add a custom URL field
 	selectionPrompt: string;
 	cursorPrompt: string;
-	customCommands: { name: string; prompt: string }[]; // Add custom commands array
+	customCommands: SlashCommand[];
+	commandPrefix: string; // Add command prefix setting
 }
 
 // Default settings values
@@ -22,6 +24,7 @@ export const DEFAULT_SETTINGS: InlineAISettings = {
 	selectionPrompt: selectionPrompt,
 	cursorPrompt: cursorPrompt,
 	customCommands: [], // Default is an empty array
+	commandPrefix: "/" // Default command prefix
 };
 
 // Settings tab class to display settings in Obsidian UI
@@ -113,6 +116,21 @@ export class InlineAISettingsTab extends PluginSettingTab {
 			.setName("Advanced")
 			.setHeading();
 
+		// Command Prefix setting
+		new Setting(containerEl)
+			.setName("Command Prefix")
+			.setDesc("The prefix used to trigger custom commands (e.g., /, !, #)")
+			.addText((text) =>
+				text
+					.setPlaceholder("/")
+					.setValue(this.plugin.settings.commandPrefix)
+					.onChange(async (value) => {
+						// Ensure the prefix is not empty
+						this.plugin.settings.commandPrefix = value || "/";
+						await this.plugin.saveSettings();
+					})
+			);
+
 		// Selection Prompt setting
 		new Setting(containerEl)
 			.setName("Selection prompt")
@@ -157,14 +175,14 @@ export class InlineAISettingsTab extends PluginSettingTab {
 		// Display existing commands
 		this.plugin.settings.customCommands.forEach((command, index) => {
 			const setting = new Setting(containerEl)
-				.setName(`Command: ${command.name}`)
+				.setName(`Command: ${command.keyword}`)
 				.setDesc("Edit the command prompt.")
 				.addText((text) =>
 					text
-						.setValue(command.name)
+						.setValue(command.keyword)
 						.setPlaceholder("Command name")
 						.onChange(async (value) => {
-							this.plugin.settings.customCommands[index].name = value;
+							this.plugin.settings.customCommands[index].keyword = value;
 							await this.plugin.saveSettings();
 						})
 				)
@@ -196,7 +214,7 @@ export class InlineAISettingsTab extends PluginSettingTab {
 					.setButtonText("Add Command")
 					.setCta()
 					.onClick(async () => {
-						this.plugin.settings.customCommands.push({ name: "New Command", prompt: "" });
+						this.plugin.settings.customCommands.push({ keyword: "new_command", prompt: "" });
 						await this.plugin.saveSettings();
 						this.display(); // Refresh the display
 					})

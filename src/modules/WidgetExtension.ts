@@ -21,7 +21,7 @@ import { ChatApiManager } from "../api";
 
 import { currentSelectionState, SelectionInfo } from "./SelectionState";
 import { slashCommandAutocompletion } from "./commands/source";
-import { slashCommands } from "./commands/commands";
+import InlineAIChatPlugin from "src/main";
 
 
 
@@ -33,6 +33,7 @@ export const acceptTooltipEffect = StateEffect.define<null>();
 class FloatingWidget extends WidgetType {
     private chatApiManager: ChatApiManager;
     private selectionInfo: SelectionInfo | null;
+    private plugin: InlineAIChatPlugin;
 
     private outerEditorView: EditorView | null = null;
 
@@ -48,10 +49,11 @@ class FloatingWidget extends WidgetType {
     private acceptButton!: HTMLButtonElement;
     private discardButton!: HTMLButtonElement;
 
-    constructor(chatApiManager: ChatApiManager, selectionInfo: SelectionInfo | null) {
+    constructor(chatApiManager: ChatApiManager, selectionInfo: SelectionInfo | null, plugin:InlineAIChatPlugin) {
         super();
         this.chatApiManager = chatApiManager;
         this.selectionInfo = selectionInfo;
+        this.plugin = plugin;
 
         // Create main DOM structure using createEl
         this.dom = createEl("div", { cls: "cm-cursor-overlay", attr: { style: "user-select: none;" } });
@@ -152,8 +154,8 @@ class FloatingWidget extends WidgetType {
                 ]),
                 // 3) Enable slash-command autocompletion
                 slashCommandAutocompletion({
-                  prefix: ':',
-                  customCommands: slashCommands
+                  prefix: this.plugin.settings.commandPrefix,
+                  customCommands: this.plugin.settings.customCommands
                 })
               ],
             }),
@@ -297,14 +299,15 @@ class FloatingWidget extends WidgetType {
  */
 function renderFloatingWidget(
     state: EditorState,
-    chatApiManager: ChatApiManager
+    chatApiManager: ChatApiManager,
+    plugin:InlineAIChatPlugin
 ): DecorationSet {
     const firstSelectedRange = state.selection.ranges.find((range) => !range.empty) ?? state.selection.main;
 
     const selectionInfo = state.field(currentSelectionState, false) ?? null;
 
     const deco = Decoration.widget({
-        widget: new FloatingWidget(chatApiManager, selectionInfo),
+        widget: new FloatingWidget(chatApiManager, selectionInfo, plugin),
         above: true,
         inline: true,
         side: -9999,
@@ -323,7 +326,7 @@ function renderFloatingWidget(
      * When the user dismisses the tooltip, it clears the decoration set.
      * Otherwise, it returns the existing decoration set.
      */
-function FloatingTooltipState(chatApiManager: ChatApiManager) {
+function FloatingTooltipState(chatApiManager: ChatApiManager, plugin:InlineAIChatPlugin) {
     return StateField.define<DecorationSet>({
         create(state) {
             return Decoration.none;
@@ -331,7 +334,7 @@ function FloatingTooltipState(chatApiManager: ChatApiManager) {
         update(decorations, tr) {
             // Recompute if the user triggers the command
             if (tr.effects.some((e) => e.is(commandEffect))) {
-                return renderFloatingWidget(tr.state, chatApiManager);
+                return renderFloatingWidget(tr.state, chatApiManager, plugin);
             }
             // Or dismiss it
             if (tr.effects.some((e) => e.is(dismissTooltipEffect))) {
@@ -347,6 +350,6 @@ function FloatingTooltipState(chatApiManager: ChatApiManager) {
 /**
  * Extension enabling selection overlay widgets.
  */
-export function FloatingTooltipExtension(chatApiManager: ChatApiManager) {
-    return [FloatingTooltipState(chatApiManager)];
+export function FloatingTooltipExtension(chatApiManager: ChatApiManager, plugin:InlineAIChatPlugin) {
+    return [FloatingTooltipState(chatApiManager, plugin)];
 }

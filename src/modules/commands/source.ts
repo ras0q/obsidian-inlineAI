@@ -1,5 +1,12 @@
 import { autocompletion, CompletionContext } from "@codemirror/autocomplete"
-import { SlashCommand, slashCommands } from "./commands";
+/**
+ * 
+ * Interface describing a slash command.
+ */
+export interface SlashCommand {
+  keyword: string;
+  prompt: string;
+}
 
 
 // Factory function that creates a completion source with custom parameters
@@ -8,10 +15,11 @@ function createSlashCommandSource(options: {
   customCommands: SlashCommand[]
 } = { 
   prefix: '/', 
-  customCommands: slashCommands
+  customCommands: []
 }) {
   const { prefix, customCommands } = options;
   console.log(prefix, customCommands)
+
   return (context: CompletionContext) => {
     let word = context.matchBefore(new RegExp(`^\\${prefix}\\w*`))
     if (!word || (word.from == word.to && !context.explicit))
@@ -19,8 +27,9 @@ function createSlashCommandSource(options: {
     return {
       from: word.from+1,
       options: (customCommands).map(cmd => ({
-        label: cmd.label,
-        type: "text"
+        label: cmd.keyword,
+        type: "text",
+        detail: cmd.prompt,
       }))
     }
   }
