@@ -20,8 +20,6 @@ function createSlashCommandSource(options: {
   customCommands: []
 }) {
   const { prefix, customCommands } = options;
-  console.log(prefix, customCommands)
-
   return (context: CompletionContext) => {
     let word = context.matchBefore(new RegExp(`^\\${prefix}\\w*`))
     if (!word || (word.from == word.to && !context.explicit))
