@@ -6,7 +6,7 @@
 	align-items: center;
 	background: var(--background-secondary) !important;
 	color: var(--text-normal);
-	font-size: var(--font-interface-theme);
+	font-size: var(--font-ui-medium);
 	border: 1px solid var(--background-modifier-border) !important;
 	user-select: none;
 	padding: 4px 8px;
@@ -116,4 +116,27 @@
 .wide-text-settings {
 	width: 25em;
 	height: 10em;
+}
+
+/* Custom reccomendations */
+.cm-tooltip-autocomplete {
+	background-color: var(--background-secondary) !important;
+	color: var(--text-normal) !important;
+	font-size: var(--font-ui-small) !important;	
+}
+
+.cm-tooltip.cm-tooltip-below{
+	top: auto !important;
+	bottom: -2.2rem !important;
+
+}
+.cm-completionLabel{
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-normal);
+}
+
+/* Slash command highlighting */
+.cm-slashCommand {
+  color: var(--text-accent);
+  
 }

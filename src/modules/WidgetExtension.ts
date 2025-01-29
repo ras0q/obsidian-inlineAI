@@ -20,7 +20,7 @@ import { setIcon } from "obsidian";
 import { ChatApiManager } from "../api";
 
 import { currentSelectionState, SelectionInfo } from "./SelectionState";
-import { slashCommandAutocompletion } from "./commands/source";
+import { createSlashCommandHighlighter, slashCommandAutocompletion } from "./commands/source";
 import InlineAIChatPlugin from "src/main";
 
 
@@ -154,6 +154,10 @@ class FloatingWidget extends WidgetType {
                 ]),
                 // 3) Enable slash-command autocompletion
                 slashCommandAutocompletion({
+                  prefix: this.plugin.settings.commandPrefix,
+                  customCommands: this.plugin.settings.customCommands
+                }),
+                createSlashCommandHighlighter({
                   prefix: this.plugin.settings.commandPrefix,
                   customCommands: this.plugin.settings.customCommands
                 })
