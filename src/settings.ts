@@ -125,9 +125,10 @@ export class InlineAISettingsTab extends PluginSettingTab {
 					.setPlaceholder("/")
 					.setValue(this.plugin.settings.commandPrefix)
 					.onChange(async (value) => {
-						// Ensure the prefix is not empty
-						this.plugin.settings.commandPrefix = value || "/";
+						// Ensure the prefix is a single character
+						this.plugin.settings.commandPrefix = value[0];
 						await this.plugin.saveSettings();
+						this.display();	
 					})
 			);
 
