@@ -6,6 +6,7 @@ import { InlineAISettings } from "./settings";
 import { App, MarkdownView, Notice } from "obsidian";
 import { EditorView } from "@codemirror/view";
 import { setGeneratedResponseEffect } from "./modules/AIExtension";
+import { parseCommand } from "./modules/commands/parser";
 
 /**
  * Class to manage interactions with different chat APIs.
@@ -164,7 +165,7 @@ export class ChatApiManager {
       **Output:**`;
     }
 
-    return this.handleEditorUpdate(systemPrompt, userPrompt);
+    return this.handleEditorUpdate(systemPrompt, parseCommand(userPrompt, this.settings.commandPrefix, this.settings.customCommands)); 
   }
 
   /**
