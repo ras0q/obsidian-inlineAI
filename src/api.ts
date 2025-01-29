@@ -184,7 +184,7 @@ export class ChatApiManager {
     this.settings = settings;
     const newChatClient = this.initializeChatClient(settings);
     if (!newChatClient) {
-      new Notice("⚠️ Failed to initialize new chat client. Check your settings.");
+      return;
     }
     this.chatClient = newChatClient;
   }
