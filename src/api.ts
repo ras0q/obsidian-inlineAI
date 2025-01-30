@@ -70,7 +70,7 @@ export class ChatApiManager {
           new Notice(`⚠️ Unsupported provider: ${settings.provider}`);
           return null;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error initializing chat client:", error);
       new Notice(`❌ Error initializing chat client: ${error.message}`);
       return null;
@@ -97,7 +97,7 @@ export class ChatApiManager {
     try {
       const aiMessage: AIMessage = await this.chatClient.invoke(messages);
       return aiMessage.content.toString();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error calling the chat model:", error);
       new Notice(`❌ Error calling the chat model: ${error.message}`);
       return "⚠️ Failed to generate a response. Please try again later.";
@@ -127,7 +127,7 @@ export class ChatApiManager {
       });
 
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error processing request:", error);
       new Notice(`❌ Error processing request: ${error.message}`);
       return "⚠️ Failed to process request.";
@@ -160,7 +160,7 @@ export class ChatApiManager {
 
     const systemPrompt = isCursor ? this.settings.cursorPrompt : this.settings.selectionPrompt;
     let userPrompt = ``;
-    
+
     if (isCursor) {
       userPrompt = `
       **Task:** ${prompt}  
@@ -173,7 +173,7 @@ export class ChatApiManager {
 
       **Output:**`;
     }
-    return this.handleEditorUpdate(systemPrompt, userPrompt); 
+    return this.handleEditorUpdate(systemPrompt, userPrompt);
   }
 
   /**
