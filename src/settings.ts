@@ -183,6 +183,7 @@ export class InlineAISettingsTab extends PluginSettingTab {
 					.inputEl.addEventListener("blur", async () => {
 						this.plugin.settings.commandPrefix = text.getValue().charAt(0);
 						await this.saveSettings();
+						this.display();
 					});
 			});
 
