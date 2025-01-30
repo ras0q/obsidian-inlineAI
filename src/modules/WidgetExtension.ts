@@ -13,8 +13,6 @@ import {
     placeholder,
     keymap,
 } from "@codemirror/view";
-import { defaultKeymap } from "@codemirror/commands";
-import { autocompletion } from "@codemirror/autocomplete"
 
 import { setIcon } from "obsidian";
 import { ChatApiManager } from "../api";
@@ -49,7 +47,7 @@ class FloatingWidget extends WidgetType {
     private acceptButton!: HTMLButtonElement;
     private discardButton!: HTMLButtonElement;
 
-    constructor(chatApiManager: ChatApiManager, selectionInfo: SelectionInfo | null, plugin:InlineAIChatPlugin) {
+    constructor(chatApiManager: ChatApiManager, selectionInfo: SelectionInfo | null, plugin: InlineAIChatPlugin) {
         super();
         this.chatApiManager = chatApiManager;
         this.selectionInfo = selectionInfo;
@@ -136,36 +134,35 @@ class FloatingWidget extends WidgetType {
 
         this.textFieldView = new EditorView({
             state: EditorState.create({
-              doc: "",
-              extensions: [
-                // 1) Show a placeholder in the input field
-                placeholder("Ask copilot"),
-                // 2) Add key bindings (including default ones for typical editor commands)
-                keymap.of([
-                  ...defaultKeymap,
-                  {
-                    key: "Enter",
-                    run: () => {
-                      this.submitAction()
-                      return true
-                    },
-                    preventDefault: true,
-                  },
-                ]),
-                // 3) Enable slash-command autocompletion
-                slashCommandAutocompletion({
-                  prefix: this.plugin.settings.commandPrefix,
-                  customCommands: this.plugin.settings.customCommands
-                }),
-                createSlashCommandHighlighter({
-                  prefix: this.plugin.settings.commandPrefix,
-                  customCommands: this.plugin.settings.customCommands
-                })
-              ],
+                doc: "",
+                extensions: [
+                    // 1) Show a placeholder in the input field
+                    placeholder("Ask copilot"),
+                    // 2) Add key bindings (including default ones for typical editor commands)
+                    keymap.of([
+                        {
+                            key: "Enter",
+                            run: () => {
+                                this.submitAction()
+                                return true
+                            },
+                            preventDefault: true,
+                        },
+                    ]),
+                    // 3) Enable slash-command autocompletion
+                    slashCommandAutocompletion({
+                        prefix: this.plugin.settings.commandPrefix,
+                        customCommands: this.plugin.settings.customCommands
+                    }),
+                    createSlashCommandHighlighter({
+                        prefix: this.plugin.settings.commandPrefix,
+                        customCommands: this.plugin.settings.customCommands
+                    })
+                ],
             }),
             parent: editorDom,
-          })
-          
+        })
+
     }
 
     private createSubmitButton() {
@@ -304,7 +301,7 @@ class FloatingWidget extends WidgetType {
 function renderFloatingWidget(
     state: EditorState,
     chatApiManager: ChatApiManager,
-    plugin:InlineAIChatPlugin
+    plugin: InlineAIChatPlugin
 ): DecorationSet {
     const firstSelectedRange = state.selection.ranges.find((range) => !range.empty) ?? state.selection.main;
 
@@ -323,14 +320,14 @@ function renderFloatingWidget(
 /**
  * Defines the selection overlay field with access to ChatApiManager.
  */
-    /**
-     * A StateField that manages the decoration set for the floating widget.
-     *
-     * When the user triggers the command, it re-renders the widget.
-     * When the user dismisses the tooltip, it clears the decoration set.
-     * Otherwise, it returns the existing decoration set.
-     */
-function FloatingTooltipState(chatApiManager: ChatApiManager, plugin:InlineAIChatPlugin) {
+/**
+ * A StateField that manages the decoration set for the floating widget.
+ *
+ * When the user triggers the command, it re-renders the widget.
+ * When the user dismisses the tooltip, it clears the decoration set.
+ * Otherwise, it returns the existing decoration set.
+ */
+function FloatingTooltipState(chatApiManager: ChatApiManager, plugin: InlineAIChatPlugin) {
     return StateField.define<DecorationSet>({
         create(state) {
             return Decoration.none;
@@ -354,6 +351,6 @@ function FloatingTooltipState(chatApiManager: ChatApiManager, plugin:InlineAICha
 /**
  * Extension enabling selection overlay widgets.
  */
-export function FloatingTooltipExtension(chatApiManager: ChatApiManager, plugin:InlineAIChatPlugin) {
+export function FloatingTooltipExtension(chatApiManager: ChatApiManager, plugin: InlineAIChatPlugin) {
     return [FloatingTooltipState(chatApiManager, plugin)];
 }
