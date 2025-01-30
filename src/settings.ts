@@ -138,7 +138,21 @@ export class InlineAISettingsTab extends PluginSettingTab {
 
 		// Custom Commands Section
 		containerEl.createEl("h3", { text: "Custom Commands" });
-		containerEl.createEl("p", { text: "Add your own custom commands. Triggered with /" });
+		containerEl.createEl("p", { text: "Add your own custom commands. Triggered with the prefix defined in the Command Prefix setting." });
+
+		// Command Prefix setting
+		new Setting(containerEl)
+			.setName("Command Prefix")
+			.setDesc("The prefix used to trigger custom commands (e.g., /, !, #)")
+			.addText((text) => {
+				text.setPlaceholder("/")
+					.setValue(this.plugin.settings.commandPrefix)
+					.inputEl.addEventListener("blur", async () => {
+						this.plugin.settings.commandPrefix = text.getValue().charAt(0);
+						await this.saveSettings();
+						this.display();
+					});
+			});
 
 		// Display existing commands
 		this.plugin.settings.customCommands.forEach((command, index) => {
@@ -173,19 +187,7 @@ export class InlineAISettingsTab extends PluginSettingTab {
 				);
 		});
 
-		// Command Prefix setting
-		new Setting(containerEl)
-			.setName("Command Prefix")
-			.setDesc("The prefix used to trigger custom commands (e.g., /, !, #)")
-			.addText((text) => {
-				text.setPlaceholder("/")
-					.setValue(this.plugin.settings.commandPrefix)
-					.inputEl.addEventListener("blur", async () => {
-						this.plugin.settings.commandPrefix = text.getValue().charAt(0);
-						await this.saveSettings();
-						this.display();
-					});
-			});
+
 
 		// Add new command button
 		new Setting(containerEl).addButton((btn) =>
