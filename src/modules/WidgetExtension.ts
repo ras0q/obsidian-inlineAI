@@ -148,6 +148,17 @@ class FloatingWidget extends WidgetType {
                             },
                             preventDefault: true,
                         },
+                        {
+                            key: "Mod-a",
+                            run: (view) => {
+                                const doc = view.state.doc;
+                                view.dispatch({
+                                    selection: { anchor: 0, head: doc.length },
+                                });
+                                return true;
+                            },
+                            preventDefault: true,
+                        },
                     ]),
                     // 3) Enable slash-command autocompletion
                     slashCommandAutocompletion({
