@@ -44,8 +44,8 @@ export default class InlineAIChatPlugin extends Plugin {
 							setSelectionInfoEffect.of({ from, to, text: selectedText })
 						);
 					} else {
-						// If no selection, you could clear it or do nothing
-						effects.push(setSelectionInfoEffect.of(null));
+						// If no selection, store cursor position instead of null
+						effects.push(setSelectionInfoEffect.of({ from, to, text: "" }));
 					}
 
 					// Also trigger the overlay

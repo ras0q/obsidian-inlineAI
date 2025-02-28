@@ -51,7 +51,8 @@ const highlightDecoration = Decoration.mark({
 export const buildSelectionHiglightState = StateField.define<DecorationSet>({
     create(state) {
         const info = state.field(currentSelectionState);
-        if (info) {
+        if (info && info.from !== info.to) {
+            console.log("info", info);
             return Decoration.set([highlightDecoration.range(info.from, info.to)]);
         }
         return Decoration.none;
@@ -59,7 +60,8 @@ export const buildSelectionHiglightState = StateField.define<DecorationSet>({
     update(decos, tr) {
         // Check if selectionInfoField has changed
         const info = tr.state.field(currentSelectionState);
-        if (info) {
+        if (info && info.from !== info.to) {
+            console.log("info update", info);
             return Decoration.set([highlightDecoration.range(info.from, info.to)]);
         }
         return Decoration.none;
