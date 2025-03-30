@@ -1,6 +1,7 @@
 // api.ts
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatOllama } from "@langchain/ollama";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { SystemMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 import { InlineAISettings } from "./settings";
 import { App, MarkdownView, Notice } from "obsidian";
@@ -12,7 +13,7 @@ import { parseCommand } from "./modules/commands/parser";
  * Class to manage interactions with different chat APIs.
  */
 export class ChatApiManager {
-  private chatClient: ChatOpenAI | ChatOllama | null;
+  private chatClient: ChatOpenAI | ChatOllama | ChatGoogleGenerativeAI | null;
   private app: App;
   private settings: InlineAISettings;
 
@@ -32,7 +33,7 @@ export class ChatApiManager {
    * @param settings - Configuration settings for the chat API.
    * @returns An instance of ChatOpenAI, ChatOllama, or null if initialization fails.
    */
-  private initializeChatClient(settings: InlineAISettings): ChatOpenAI | ChatOllama | null {
+  private initializeChatClient(settings: InlineAISettings): ChatOpenAI | ChatOllama | ChatGoogleGenerativeAI | null {
     try {
       switch (settings.provider) {
         case "openai":
@@ -50,7 +51,11 @@ export class ChatApiManager {
           return new ChatOllama({
             model: settings.model,
           });
-
+        case "gemini":
+          return new ChatGoogleGenerativeAI({
+            model: settings.model,
+            apiKey: settings.apiKey,
+          });
         case "custom":
           if (!settings.apiKey || !settings.customURL) {
             new Notice("⚠️ API key and custom base URL are required for custom providers.");

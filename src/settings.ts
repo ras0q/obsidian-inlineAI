@@ -5,7 +5,7 @@ import { SlashCommand } from "./modules/commands/source";
 
 // Interface for the settings
 export interface InlineAISettings {
-	provider: "openai" | "ollama" | "custom";
+	provider: "openai" | "ollama" | "custom" | "gemini";
 	model: string;
 	apiKey?: string;
 	customURL?: string;
@@ -53,10 +53,11 @@ export class InlineAISettingsTab extends PluginSettingTab {
 				dropdown
 					.addOption("openai", "OpenAI")
 					.addOption("ollama", "Ollama")
+					.addOption("gemini", "Gemini")
 					.addOption("custom", "Custom/OpenAI-compatible")
 					.setValue(this.plugin.settings.provider)
 					.onChange(async (value) => {
-						this.plugin.settings.provider = value as "openai" | "ollama" | "custom";
+						this.plugin.settings.provider = value as "openai" | "ollama" | "custom" | "gemini";
 						await this.saveSettings();
 						this.display(); // Refresh UI to show/hide API key field
 					})
@@ -76,7 +77,7 @@ export class InlineAISettingsTab extends PluginSettingTab {
 			});
 
 		// API Key setting (conditionally displayed for OpenAI-supported endpoints)
-		if (this.plugin.settings.provider === "openai" || this.plugin.settings.provider === "custom") {
+		if (this.plugin.settings.provider === "openai" || this.plugin.settings.provider === "custom" || this.plugin.settings.provider === "gemini") {
 			new Setting(containerEl)
 				.setName("API key")
 				.setDesc("Enter your API key.")
