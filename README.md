@@ -32,7 +32,7 @@
 
 ### **3. Full AI Integration**
 
-- Supports **OpenAI**, **Ollama**, and other APIs.
+- Supports **OpenAI**, **Ollama**,**Gemini** and other APIs.
 - Local model support for privacy-first workflows.
 
 ---
@@ -61,7 +61,7 @@
 1. **Set up your API key**:
 
    - Open the plugin settings in Obsidian.
-   - Enter your API key for OpenAI, Ollama, or any supported model provider.
+   - Enter your API key for OpenAI, Ollama, Gemini or any supported model provider.
 2. **Choose a model**:
 
    - Supported models include `gpt-4`, `llama3.2`, and others.
