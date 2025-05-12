@@ -38,12 +38,14 @@ function createSlashCommandSource(options: {
 // Create the extension that uses our custom completion source.
 export function slashCommandAutocompletion(options: { prefix: string, customCommands: SlashCommand[] } = { prefix: '/', customCommands: [] }) {
   return autocompletion({
-    override: [createSlashCommandSource(options)]
+    override: [createSlashCommandSource(options)],
+    tooltipClass: () => "tooltip-autocomplete",
+    optionClass: () => "completion-label",
   })
 }
 
 // Create a decoration for highlighting slash commands
-const slashCommandMark = Decoration.mark({ class: "cm-slashCommand" })
+const slashCommandMark = Decoration.mark({ class: "cm-slash-command" })
 
 export function createSlashCommandHighlighter({ prefix, customCommands }: { prefix: string, customCommands: SlashCommand[] }) {
   return ViewPlugin.fromClass(class {

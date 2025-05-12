@@ -118,25 +118,34 @@
 	height: 10em;
 }
 
-/* Custom reccomendations */
-.cm-tooltip-autocomplete {
-	background-color: var(--background-secondary) !important;
+.tooltip-autocomplete{
+	background-color: var(--background-primary-alt) !important;
 	color: var(--text-normal) !important;
-	font-size: var(--font-ui-small) !important;	
+	width: min(102%, var(--line-width)) !important;
+	margin-left: -1.1rem;
+	overflow: hidden;
+	border: 1px solid var(--background-modifier-border) !important;
+	border-radius: 4px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
 }
 
-.cm-tooltip.cm-tooltip-below{
-	top: auto !important;
-	bottom: -2.2rem !important;
-
-}
-.cm-completionLabel{
+.completion-label{
 	font-size: var(--font-ui-small);
 	font-weight: var(--font-normal);
+	font-family: var(--font-interface-theme);
+	border-radius: 4px;
+	margin-left: -1em;
+}
+
+.cm-tooltip.cm-tooltip-below {
+	top: 100%;
+	margin-top: 0.8em;   
+	bottom: auto;
 }
 
 /* Slash command highlighting */
-.cm-slashCommand {
+.cm-slash-command {
   color: var(--text-accent);
   
 }
