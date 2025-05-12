@@ -61,7 +61,6 @@ export const buildSelectionHiglightState = StateField.define<DecorationSet>({
         // Check if selectionInfoField has changed
         const info = tr.state.field(currentSelectionState);
         if (info && info.from !== info.to) {
-            console.log("info update", info);
             return Decoration.set([highlightDecoration.range(info.from, info.to)]);
         }
         return Decoration.none;
