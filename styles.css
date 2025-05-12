@@ -127,13 +127,12 @@
 	border: 1px solid var(--background-modifier-border) !important;
 	border-radius: 4px;
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-
 }
 
 .completion-label{
 	font-size: var(--font-ui-small);
 	font-weight: var(--font-normal);
-	font-family: var(--font-interface-theme);
+	font-family: Arial, Helvetica, sans-serif !important;
 	border-radius: 4px;
 	margin-left: -1em;
 }
