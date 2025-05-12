@@ -128,4 +128,4 @@ Want to contribute? Here’s how:
 
 ## 📝 License
 
-This project is licensed under the [MIT License](LICENSE). Feel free to fork, contribute, and enhance the plugin!
+This project is licensed under the [GPL-3.0 license](LICENSE). Feel free to fork, contribute, and enhance the plugin!
