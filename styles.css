@@ -121,12 +121,17 @@
 .tooltip-autocomplete{
 	background-color: var(--background-primary-alt) !important;
 	color: var(--text-normal) !important;
-	width: min(102%, var(--line-width)) !important;
-	margin-left: -1.1rem;
+	width: 101.9% !important;
+	margin-left: -1.05rem;
 	overflow: hidden;
-	border: 1px solid var(--background-modifier-border) !important;
+	border: 1px solid var(--background-modifier-border-focus);
 	border-radius: 4px;
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.tooltip-autocomplete li[aria-selected] {
+	background-color: var(--text-selection)!important;
+	color: var(--text-accent) !important;
 }
 
 .completion-label{
