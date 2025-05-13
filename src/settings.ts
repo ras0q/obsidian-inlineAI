@@ -13,6 +13,7 @@ export interface InlineAISettings {
 	cursorPrompt: string;
 	customCommands: SlashCommand[];
 	commandPrefix: string;
+	messageHistory: boolean;
 }
 
 // Default settings values
@@ -24,7 +25,8 @@ export const DEFAULT_SETTINGS: InlineAISettings = {
 	selectionPrompt: selectionPrompt,
 	cursorPrompt: cursorPrompt,
 	customCommands: [],
-	commandPrefix: "/"
+	commandPrefix: "/",
+	messageHistory: false
 };
 
 export class InlineAISettingsTab extends PluginSettingTab {
@@ -137,6 +139,18 @@ export class InlineAISettingsTab extends PluginSettingTab {
 				textarea.inputEl.classList.add("wide-text-settings");
 			});
 
+		// Message History setting
+		new Setting(containerEl)
+			.setName("Message History")
+			.setDesc("Enable message history, you can navigate through the history using the up/down arrow keys.")
+			.addToggle((toggle) => {
+				toggle.setValue(this.plugin.settings.messageHistory)
+					.onChange(async (value) => {
+						this.plugin.settings.messageHistory = value;
+						await this.saveSettings();
+					});
+			});
+		
 		// Custom Commands Section
 		containerEl.createEl("h3", { text: "Custom Commands" });
 		containerEl.createEl("p", { text: "Add your own custom commands. Triggered with the prefix defined in the Command Prefix setting." });

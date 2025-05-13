@@ -164,7 +164,9 @@ export class ChatApiManager {
     const systemPrompt = isCursor ? this.settings.cursorPrompt : this.settings.selectionPrompt;
     let finalUserPrompt = ``;
     const mode = isCursor ? "cursor" : "selection";
-    this.messageHistory.enqueue({ mode, userPrompt });
+    if (this.settings.messageHistory) {
+      this.messageHistory.enqueue({ mode, userPrompt });
+    }
 
     if (isCursor) {
       finalUserPrompt = `
