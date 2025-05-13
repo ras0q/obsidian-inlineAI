@@ -8,6 +8,14 @@ import { App, MarkdownView, Notice } from "obsidian";
 import { EditorView } from "@codemirror/view";
 import { setGeneratedResponseEffect } from "./modules/AIExtension";
 import { parseCommand } from "./modules/commands/parser";
+import { MessageQueue } from "./modules/messageHistory/queue";
+
+const MESSAGE_HISTORY_LIMIT = 20;
+
+export type HistoryMessage = {
+  mode: string;
+  userPrompt: string;
+};
 
 /**
  * Class to manage interactions with different chat APIs.
@@ -16,7 +24,7 @@ export class ChatApiManager {
   private chatClient: ChatOpenAI | ChatOllama | ChatGoogleGenerativeAI | null;
   private app: App;
   private settings: InlineAISettings;
-
+  private messageHistory: MessageQueue<HistoryMessage>;
   /**
    * Initializes the ChatApiManager with the given settings.
    * @param settings - Configuration settings for the chat API.
@@ -26,6 +34,7 @@ export class ChatApiManager {
     this.app = app;
     this.chatClient = this.initializeChatClient(settings);
     this.settings = settings;
+    this.messageHistory = new MessageQueue<HistoryMessage>(MESSAGE_HISTORY_LIMIT);
   }
 
   /**
@@ -138,25 +147,14 @@ export class ChatApiManager {
       return "⚠️ Failed to process request.";
     }
   }
-
-  /**
-   * Handles user input and generates a response using the cursor API.
-   * @param userRequest - The user's request to process.
-   * @returns The AI-generated response or an error message.
-   */
-  public async callCursor(userRequest: string): Promise<string> {
-    const systemPrompt = "You are a helpful assistant. Please help the user with the following request:";
-    return this.handleEditorUpdate(systemPrompt, userRequest);
-  }
-
-  /**
+ /**
    * Processes selected text using the specified prompt and transformation.
-   * @param prompt - The transformation prompt (e.g., "Add Emojis").
+   * @param userPrompt - The transformation prompt (e.g., "Add Emojis").
    * @param selectedText - The selected text to transform.
    * @returns The transformed text or an error message.
    */
-  public async callSelection(prompt: string, selectedText: string): Promise<string> {
-    prompt = parseCommand(prompt, this.settings.commandPrefix, this.settings.customCommands);
+  public async callSelection(userPrompt: string, selectedText: string): Promise<string> {
+    userPrompt = parseCommand(userPrompt, this.settings.commandPrefix, this.settings.customCommands);
 
     let isCursor = false;
     if (selectedText.trim().length === 0) {
@@ -164,21 +162,23 @@ export class ChatApiManager {
     }
 
     const systemPrompt = isCursor ? this.settings.cursorPrompt : this.settings.selectionPrompt;
-    let userPrompt = ``;
+    let finalUserPrompt = ``;
+    const mode = isCursor ? "cursor" : "selection";
+    this.messageHistory.enqueue({ mode, userPrompt });
 
     if (isCursor) {
-      userPrompt = `
-      **Task:** ${prompt}  
+      finalUserPrompt = `
+      **Task:** ${userPrompt}  
       **Output:**`;
     } else {
-      userPrompt = `
-      **Task:** ${prompt}  
+      finalUserPrompt = `
+      **Task:** ${userPrompt}  
       **Input:**  
       ${selectedText}
 
       **Output:**`;
     }
-    return this.handleEditorUpdate(systemPrompt, userPrompt);
+    return this.handleEditorUpdate(systemPrompt, finalUserPrompt);
   }
 
   /**
@@ -192,5 +192,9 @@ export class ChatApiManager {
       return;
     }
     this.chatClient = newChatClient;
+  }
+
+  public getMessageHistory(): HistoryMessage[] {
+    return this.messageHistory.getItems();
   }
 }

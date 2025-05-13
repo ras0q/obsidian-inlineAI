@@ -47,6 +47,9 @@ class FloatingWidget extends WidgetType {
     private acceptButton!: HTMLButtonElement;
     private discardButton!: HTMLButtonElement;
 
+    // Track the current index in message history for up/down navigation
+    private messageHistoryIndex: number | null = null;
+
     constructor(chatApiManager: ChatApiManager, selectionInfo: SelectionInfo | null, plugin: InlineAIChatPlugin) {
         super();
         this.chatApiManager = chatApiManager;
@@ -111,6 +114,7 @@ class FloatingWidget extends WidgetType {
 
         this.textFieldView = undefined;
         this.outerEditorView = null;
+        this.messageHistoryIndex = null;
     }
 
     private dismissTooltip() {
@@ -159,7 +163,81 @@ class FloatingWidget extends WidgetType {
                             },
                             preventDefault: true,
                         },
+                        {
+                            key: "ArrowUp",
+                            run: () => {
+                                const messageHistory = this.chatApiManager.getMessageHistory();
+                                if (messageHistory.length === 0 || !this.textFieldView) {
+                                    return true;
+                                }
+
+                                // If not started, set to last index
+                                if (this.messageHistoryIndex === null) {
+                                    this.messageHistoryIndex = messageHistory.length - 1;
+                                } else if (this.messageHistoryIndex > 0) {
+                                    this.messageHistoryIndex--;
+                                }
+                                // Clamp to 0
+                                if (this.messageHistoryIndex < 0) this.messageHistoryIndex = 0;
+
+                                const msg = messageHistory[this.messageHistoryIndex].userPrompt;
+                                this.textFieldView.dispatch({
+                                    changes: {
+                                        from: 0,
+                                        to: this.textFieldView.state.doc.length,
+                                        insert: msg,
+                                    }
+                                });
+                                // Move cursor to end
+                                this.textFieldView.dispatch({
+                                    selection: { anchor: msg.length, head: msg.length }
+                                });
+                                return true;
+                            },
+                            preventDefault: true,
+                        },
+                        {
+                            key: "ArrowDown",
+                            run: () => {
+                                const messageHistory = this.chatApiManager.getMessageHistory();
+                                if (messageHistory.length === 0 || !this.textFieldView) {
+                                    return true;
+                                }
+                                if (this.messageHistoryIndex === null) {
+                                    // Do nothing if not in history navigation
+                                    return true;
+                                }
+                                if (this.messageHistoryIndex < messageHistory.length - 1) {
+                                    this.messageHistoryIndex++;
+                                    const msg = messageHistory[this.messageHistoryIndex].userPrompt;
+                                    this.textFieldView.dispatch({
+                                        changes: {
+                                            from: 0,
+                                            to: this.textFieldView.state.doc.length,
+                                            insert: msg,
+                                        }
+                                    });
+                                    // Move cursor to end
+                                    this.textFieldView.dispatch({
+                                        selection: { anchor: msg.length, head: msg.length }
+                                    });
+                                } else {
+                                    // If at the end, clear the field and exit history navigation
+                                    this.messageHistoryIndex = null;
+                                    this.textFieldView.dispatch({
+                                        changes: {
+                                            from: 0,
+                                            to: this.textFieldView.state.doc.length,
+                                            insert: "",
+                                        }
+                                    });
+                                }
+                                return true;
+                            },
+                            preventDefault: true,
+                        },
                     ]),
+
                     // 3) Enable slash-command autocompletion
                     slashCommandAutocompletion({
                         prefix: this.plugin.settings.commandPrefix,
@@ -174,6 +252,13 @@ class FloatingWidget extends WidgetType {
             parent: editorDom,
         })
 
+        // Reset messageHistoryIndex when user types or changes input
+        this.textFieldView.dom.addEventListener("input", () => {
+            // Only reset if the input is not the result of an up/down navigation
+            // (i.e., if the value doesn't match the current history entry)
+            // But for simplicity, always reset if user types
+            this.messageHistoryIndex = null;
+        });
     }
 
     private createSubmitButton() {
@@ -223,6 +308,8 @@ class FloatingWidget extends WidgetType {
                 this.toggleLoading(false);
             });
 
+        // Reset message history navigation after submit
+        this.messageHistoryIndex = null;
     }
 
     /**
