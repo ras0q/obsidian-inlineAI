@@ -109,8 +109,7 @@ export class InlineAISettingsTab extends PluginSettingTab {
 		}
 
 		// Advanced Section
-		new Setting(containerEl).setName("Advanced").setHeading();
-
+		containerEl.createEl("h3", { text: "Advanced" });
 		// Selection Prompt setting
 		new Setting(containerEl)
 			.setName("Selection prompt")
