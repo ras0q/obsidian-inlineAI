@@ -44,6 +44,12 @@ export class ChatApiManager {
    */
   private initializeChatClient(settings: InlineAISettings): ChatOpenAI | ChatOllama | ChatGoogleGenerativeAI | null {
     try {
+      if (settings.messageHistory) {
+        this.messageHistory = new MessageQueue<HistoryMessage>(MESSAGE_HISTORY_LIMIT);
+      } else {
+        this.messageHistory = new MessageQueue<HistoryMessage>(0);
+      }
+      
       switch (settings.provider) {
         case "openai":
           if (!settings.apiKey) {
