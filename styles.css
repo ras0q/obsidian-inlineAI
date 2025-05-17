@@ -27,7 +27,7 @@
 .cm-tooltip-editor {
 	display: flex;
 	padding: 1px 0 1px 10px;
-	height: var(--line-height);
+	height: auto;
 	width: auto;
 	max-height: 100%;
 	align-items: center;
@@ -46,11 +46,11 @@
 
 /* Button Styles */
 .submit-button {
-	height: var(--line-height);
+	height: auto;
 }
 
 .tooltip-button {
-	height: var(--line-height);
+	height: auto;
 	margin-left: 8px;
 	border: 1px solid var(--background-modifier-border-focus);
 	box-shadow: none !important;
@@ -122,7 +122,7 @@
 	background-color: var(--background-primary-alt) !important;
 	color: var(--text-normal) !important;
 	width: 101.9% !important;
-	margin-left: -1.05rem;
+	margin-left: -1.1rem !important;
 	overflow: hidden;
 	border: 1px solid var(--background-modifier-border-focus);
 	border-radius: 4px;
@@ -140,6 +140,7 @@
 	font-family: Arial, Helvetica, sans-serif !important;
 	border-radius: 4px;
 	margin-left: -1em;
+	white-space: nowrap;
 }
 
 .cm-tooltip.cm-tooltip-below {
