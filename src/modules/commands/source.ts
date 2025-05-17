@@ -41,7 +41,9 @@ export function slashCommandAutocompletion(options: { prefix: string, customComm
     override: [createSlashCommandSource(options)],
     tooltipClass: () => "tooltip-autocomplete",
     optionClass: () => "completion-label",
-  })
+    icons: false,
+    }
+  )
 }
 
 // Create a decoration for highlighting slash commands
