@@ -50,6 +50,11 @@ class FloatingWidget extends WidgetType {
     // Track the current index in message history for up/down navigation
     private messageHistoryIndex: number | null = null;
 
+    // Store references to event listeners for cleanup
+    private onClickOutside: ((event: MouseEvent) => void) | null = null;
+    private onEscape: ((event: KeyboardEvent) => void) | null = null;
+    private escapeWindows: Window[] = [];
+
     constructor(chatApiManager: ChatApiManager, selectionInfo: SelectionInfo | null, plugin: InlineAIChatPlugin) {
         super();
         this.chatApiManager = chatApiManager;
@@ -78,25 +83,64 @@ class FloatingWidget extends WidgetType {
         }, 0);
 
         // Setup "click outside" and "Escape" dismissal
-        const onClickOutside = (event: MouseEvent) => {
+
+        // Click outside works as before
+        this.onClickOutside = (event: MouseEvent) => {
             if (!this.dom.contains(event.target as Node)) {
                 this.dismissTooltip();
             }
         };
 
-        const onEscape = (event: KeyboardEvent) => {
+        // Escape key: listen on all windows (main and popouts)
+        this.onEscape = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
                 this.dismissTooltip();
             }
         };
 
-        document.addEventListener("mousedown", onClickOutside);
-        document.addEventListener("keydown", onEscape);
+        // Always add to main window
+        document.addEventListener("mousedown", this.onClickOutside);
+        window.addEventListener("keydown", this.onEscape);
+
+        // Try to add to all popout windows (if any)
+        this.escapeWindows = [window];
+        // @ts-ignore
+        if (window.app && window.app.openPopouts instanceof Function) {
+            // Obsidian 1.4+ openPopouts returns array of popout windows
+            // @ts-ignore
+            const popouts: Window[] = window.app.openPopouts();
+            for (const popout of popouts) {
+                try {
+                    popout.addEventListener("keydown", this.onEscape!);
+                    this.escapeWindows.push(popout);
+                } catch (e) {
+                    // ignore
+                }
+            }
+        } else if ((window as any).app && Array.isArray((window as any).app?.workspace?.getWindows?.())) {
+            // Legacy: app.workspace.getWindows() returns array of windows
+            const popouts: Window[] = (window as any).app.workspace.getWindows();
+            for (const popout of popouts) {
+                try {
+                    popout.addEventListener("keydown", this.onEscape!);
+                    this.escapeWindows.push(popout);
+                } catch (e) {
+                    // ignore
+                }
+            }
+        }
 
         // Cleanup
         this.dom.addEventListener("destroy", () => {
-            document.removeEventListener("mousedown", onClickOutside);
-            document.removeEventListener("keydown", onEscape);
+            document.removeEventListener("mousedown", this.onClickOutside!);
+            for (const win of this.escapeWindows) {
+                try {
+                    win.removeEventListener("keydown", this.onEscape!);
+                } catch (e) {
+                    // ignore
+                }
+            }
+            this.escapeWindows = [];
         });
 
         return this.dom;
