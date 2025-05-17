@@ -83,15 +83,13 @@ class FloatingWidget extends WidgetType {
         }, 0);
 
         // Setup "click outside" and "Escape" dismissal
-
-        // Click outside works as before
         this.onClickOutside = (event: MouseEvent) => {
             if (!this.dom.contains(event.target as Node)) {
                 this.dismissTooltip();
             }
         };
 
-        // Escape key: listen on all windows (main and popouts)
+        // Escape key: listen on all windows 
         this.onEscape = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
                 this.dismissTooltip();
@@ -99,7 +97,7 @@ class FloatingWidget extends WidgetType {
         };
 
         // Always add to main window
-        document.addEventListener("mousedown", this.onClickOutside);
+        window.addEventListener("mousedown", this.onClickOutside);
         window.addEventListener("keydown", this.onEscape);
 
         // Try to add to all popout windows (if any)
