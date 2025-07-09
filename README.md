@@ -76,18 +76,6 @@
 
 ---
 
----
-
-## 🔮 Roadmap
-
-InlineAI is actively evolving! Here’s what’s next:
-
-- **Tool use**: Save your commonly used tools as commands for easy use.
-
-Stay updated on our progress via the [GitHub Project Board](https://github.com/FBarrca/obsidian-inlineai/projects).
-
----
-
 ## 🙏 Feedback and Support
 
 We value your feedback and aim to make InlineAI the ultimate AI writing assistant:
