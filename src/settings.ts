@@ -5,10 +5,6 @@ import { SlashCommand } from "./modules/commands/source";
 
 // Interface for the settings
 export interface InlineAISettings {
-	provider: "openai" | "ollama" | "custom" | "gemini";
-	model: string;
-	apiKey?: string;
-	customURL?: string;
 	selectionPrompt: string;
 	cursorPrompt: string;
 	customCommands: SlashCommand[];
@@ -18,10 +14,6 @@ export interface InlineAISettings {
 
 // Default settings values
 export const DEFAULT_SETTINGS: InlineAISettings = {
-	provider: "ollama",
-	model: "llama3.2",
-	apiKey: "",
-	customURL: "",
 	selectionPrompt: selectionPrompt,
 	cursorPrompt: cursorPrompt,
 	customCommands: [],
@@ -46,67 +38,6 @@ export class InlineAISettingsTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
-
-		// Provider setting
-		new Setting(containerEl)
-			.setName("Provider")
-			.setDesc("Choose between OpenAI, Ollama, or a custom OpenAI-compatible endpoint.")
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOption("openai", "OpenAI")
-					.addOption("ollama", "Ollama")
-					.addOption("gemini", "Gemini")
-					.addOption("custom", "Custom/OpenAI-compatible")
-					.setValue(this.plugin.settings.provider)
-					.onChange(async (value) => {
-						this.plugin.settings.provider = value as "openai" | "ollama" | "custom" | "gemini";
-						await this.saveSettings();
-						this.display(); // Refresh UI to show/hide API key field
-					})
-			);
-
-		// Model setting
-		new Setting(containerEl)
-			.setName("Model")
-			.setDesc("Specify the model to use.")
-			.addText((text) => {
-				text.setPlaceholder("e.g., gpt-4o-mini")
-					.setValue(this.plugin.settings.model)
-					.inputEl.addEventListener("blur", async () => {
-						this.plugin.settings.model = text.getValue();
-						await this.saveSettings();
-					});
-			});
-
-		// API Key setting (conditionally displayed for OpenAI-supported endpoints)
-		if (this.plugin.settings.provider === "openai" || this.plugin.settings.provider === "custom" || this.plugin.settings.provider === "gemini") {
-			new Setting(containerEl)
-				.setName("API key")
-				.setDesc("Enter your API key.")
-				.addText((text) => {
-					text.setPlaceholder("sk-...")
-						.setValue(this.plugin.settings.apiKey || "")
-						.inputEl.addEventListener("blur", async () => {
-							this.plugin.settings.apiKey = text.getValue();
-							await this.saveSettings();
-						});
-				});
-		}
-
-		// Custom endpoint setting (only for "custom" provider)
-		if (this.plugin.settings.provider === "custom") {
-			new Setting(containerEl)
-				.setName("Custom endpoint")
-				.setDesc("Enter your OpenAI-compatible base URL (e.g. https://api.groq.com/openai/v1).")
-				.addText((text) => {
-					text.setPlaceholder("https://api.mycustomhost.com/v1")
-						.setValue(this.plugin.settings.customURL || "")
-						.inputEl.addEventListener("blur", async () => {
-							this.plugin.settings.customURL = text.getValue();
-							await this.saveSettings();
-						});
-				});
-		}
 
 		// Advanced Section
 		containerEl.createEl("h3", { text: "Advanced" });
@@ -149,7 +80,7 @@ export class InlineAISettingsTab extends PluginSettingTab {
 						await this.saveSettings();
 					});
 			});
-		
+
 		// Custom Commands Section
 		containerEl.createEl("h3", { text: "Custom Commands" });
 		containerEl.createEl("p", { text: "Add your own custom commands. Triggered with the prefix defined in the Command Prefix setting." });

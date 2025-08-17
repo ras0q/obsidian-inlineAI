@@ -1,14 +1,11 @@
 // api.ts
-import { ChatOpenAI } from "@langchain/openai";
-import { ChatOllama } from "@langchain/ollama";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { SystemMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 import { InlineAISettings } from "./settings";
 import { App, MarkdownView, Notice } from "obsidian";
 import { EditorView } from "@codemirror/view";
 import { setGeneratedResponseEffect } from "./modules/AIExtension";
 import { parseCommand } from "./modules/commands/parser";
 import { MessageQueue } from "./modules/messageHistory/queue";
+import { IAIProvidersService } from "@obsidian-ai-providers/sdk";
 
 const MESSAGE_HISTORY_LIMIT = 20;
 
@@ -21,8 +18,8 @@ export type HistoryMessage = {
  * Class to manage interactions with different chat APIs.
  */
 export class ChatApiManager {
-  private chatClient: ChatOpenAI | ChatOllama | ChatGoogleGenerativeAI | null;
   private app: App;
+  private chatClient: IAIProvidersService;
   private settings: InlineAISettings;
   private messageHistory: MessageQueue<HistoryMessage>;
   /**
@@ -30,71 +27,12 @@ export class ChatApiManager {
    * @param settings - Configuration settings for the chat API.
    * @param app - The Obsidian App instance.
    */
-  constructor(settings: InlineAISettings, app: App) {
+  constructor(settings: InlineAISettings, app: App, chatClient: IAIProvidersService) {
     this.app = app;
-    this.chatClient = this.initializeChatClient(settings);
+	this.chatClient = chatClient;
     this.settings = settings;
     this.messageHistory = new MessageQueue<HistoryMessage>(MESSAGE_HISTORY_LIMIT);
-  }
-
-  /**
-   * Initializes the appropriate chat client based on the provider specified in settings.
-   * @param settings - Configuration settings for the chat API.
-   * @returns An instance of ChatOpenAI, ChatOllama, or null if initialization fails.
-   */
-  private initializeChatClient(settings: InlineAISettings): ChatOpenAI | ChatOllama | ChatGoogleGenerativeAI | null {
-    try {
-      if (settings.messageHistory) {
-        this.messageHistory = new MessageQueue<HistoryMessage>(MESSAGE_HISTORY_LIMIT);
-      } else {
-        this.messageHistory = new MessageQueue<HistoryMessage>(0);
-      }
-      
-      switch (settings.provider) {
-        case "openai":
-          if (!settings.apiKey) {
-            new Notice("⚠️ OpenAI API key is required. Please check your settings.");
-            return null;
-          }
-          return new ChatOpenAI({
-            modelName: settings.model,
-            temperature: 0,
-            apiKey: settings.apiKey,
-          });
-
-        case "ollama":
-          return new ChatOllama({
-            model: settings.model,
-          });
-        case "gemini":
-          return new ChatGoogleGenerativeAI({
-            model: settings.model,
-            apiKey: settings.apiKey,
-          });
-        case "custom":
-          if (!settings.apiKey || !settings.customURL) {
-            new Notice("⚠️ API key and custom base URL are required for custom providers.");
-            return null;
-          }
-          return new ChatOpenAI({
-            modelName: settings.model,
-            temperature: 0,
-            openAIApiKey: settings.apiKey,
-            // 'configuration.basePath' is the recognized property
-            configuration: {
-              baseURL: settings.customURL.trim(),
-            },
-          });
-
-        default:
-          new Notice(`⚠️ Unsupported provider: ${settings.provider}`);
-          return null;
-      }
-    } catch (error: any) {
-      console.error("Error initializing chat client:", error);
-      new Notice(`❌ Error initializing chat client: ${error.message}`);
-      return null;
-    }
+	this.updateSettings(settings);
   }
 
   /**
@@ -109,14 +47,17 @@ export class ChatApiManager {
       return "⚠️ Chat client is not available.";
     }
 
-    const messages = [
-      new SystemMessage(systemMessage),
-      new HumanMessage(message),
-    ];
-
     try {
-      const aiMessage: AIMessage = await this.chatClient.invoke(messages);
-      return aiMessage.content.toString();
+      const fullText = await this.chatClient.execute({
+		provider: this.chatClient.providers[0],
+		messages: [
+			{ role: "system", content: systemMessage },
+			{ role: "user", content: message }
+		],
+		onProgress: () => {},
+	  });
+	  console.log(fullText)
+      return fullText;
     } catch (error: any) {
       console.error("Error calling the chat model:", error);
       new Notice(`❌ Error calling the chat model: ${error.message}`);
@@ -176,12 +117,12 @@ export class ChatApiManager {
 
     if (isCursor) {
       finalUserPrompt = `
-      **Task:** ${userPrompt}  
+      **Task:** ${userPrompt}
       **Output:**`;
     } else {
       finalUserPrompt = `
-      **Task:** ${userPrompt}  
-      **Input:**  
+      **Task:** ${userPrompt}
+      **Input:**
       ${selectedText}
 
       **Output:**`;
@@ -195,11 +136,12 @@ export class ChatApiManager {
    */
   public updateSettings(settings: InlineAISettings): void {
     this.settings = settings;
-    const newChatClient = this.initializeChatClient(settings);
-    if (!newChatClient) {
-      return;
-    }
-    this.chatClient = newChatClient;
+
+    if (settings.messageHistory) {
+	  this.messageHistory = new MessageQueue<HistoryMessage>(MESSAGE_HISTORY_LIMIT);
+	} else {
+	  this.messageHistory = new MessageQueue<HistoryMessage>(0);
+	}
   }
 
   public getMessageHistory(): HistoryMessage[] {

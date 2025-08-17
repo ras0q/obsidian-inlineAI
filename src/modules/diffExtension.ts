@@ -66,6 +66,7 @@ function generateDiffView(state: EditorState): DecorationSet {
 
         // Use diff_match_patch instead of diffWords
         const dmp = new DiffMatchPatch();
+		console.log({contextText, aiText});
         let diffs = dmp.diff_main(contextText, aiText);
 
         // Perform semantic cleanup

@@ -7,6 +7,7 @@ import { ChatApiManager } from "./api";
 import { generatedResponseState } from "./modules/AIExtension";
 import { buildSelectionHiglightState, currentSelectionState, setSelectionInfoEffect } from "./modules/SelectionState";
 import { diffExtension } from "./modules/diffExtension";
+import { initAI, waitForAI } from "@obsidian-ai-providers/sdk";
 
 export default class InlineAIChatPlugin extends Plugin {
 	settings: InlineAISettings = DEFAULT_SETTINGS;
@@ -14,7 +15,12 @@ export default class InlineAIChatPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		this.chatapi = new ChatApiManager(this.settings, this.app);
+
+		await initAI(this.app, this, async () => {});
+		const aiResolver = await waitForAI();
+		const chatClient = await aiResolver.promise;
+
+		this.chatapi = new ChatApiManager(this.settings, this.app, chatClient);
 
 		this.registerEditorExtension([
 			FloatingTooltipExtension(this.chatapi, this),

@@ -12,7 +12,6 @@
 	"author": "FBarrca",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/codemirror": "^5.60.15",
 		"@types/node": "^22.8.1",
 		"@typescript-eslint/eslint-plugin": "^8.11.0",
 		"@typescript-eslint/parser": "^8.11.0",
@@ -26,10 +25,7 @@
 		"@codemirror/commands": "^6.8.0",
 		"@codemirror/state": "^6.5.1",
 		"@codemirror/view": "^6.36.2",
-		"@langchain/core": "^0.3.16",
-		"@langchain/google-genai": "^0.2.1",
-		"@langchain/ollama": "^0.1.1",
-		"@langchain/openai": "^0.3.11",
+		"@obsidian-ai-providers/sdk": "1.7.1",
 		"@types/diff-match-patch": "^1.0.36",
 		"diff-match-patch": "^1.0.5"
 	}
